@@ -3,7 +3,7 @@ from utils.bandit_util import *
 experiment(
     k=10,
     bandit_class=Bandit,
-    combinations=[
+    plans=[
         [SampleAverageValue(), EpsilonGreedyPolicy(epsilon=.1)],
         [SampleAverageValue(), UpperConfidenceBoundPolicy(c=2)]
     ],

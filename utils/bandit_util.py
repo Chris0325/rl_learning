@@ -1,7 +1,7 @@
-import logging
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from scipy.special import softmax
 from collections import defaultdict
 
 np.random.seed(0)
@@ -9,8 +9,8 @@ np.random.seed(0)
 
 class Bandit:
 
-    def __init__(self, k):
-        self.k, self.means = k, np.random.randn(k)
+    def __init__(self, k, loc=0):
+        self.k, self.means = k, np.random.normal(loc=loc, scale=1, size=k)
         self.variance = 1
     
     def evolve(self):
@@ -144,11 +144,7 @@ class ConstantStepValue(SlowSampleAverageValue):
         return None, reward_history
 
 
-class ConstantStepUnbiasValue(SlowSampleAverageValue):
-
-    def __init__(self, a, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.a = a
+class ConstantStepUnbiasValue(ConstantStepValue):
 
     def __str__(self):
         return f'csub,a={self.a}'
@@ -171,27 +167,58 @@ class ConstantStepUnbiasValue(SlowSampleAverageValue):
         return None, reward_history
 
 
-def experiment(k, bandit_class, combinations, runs, need_best_ratio=True):
-    def combination_to_str(value, policy):
+class GradientValue(ConstantStepValue):
+
+    def __str__(self):
+        return f'g,a={self.a}'
+
+    def run(self, bandit, policy='w_b', need_best_ratio=False):
+        action_history, reward_history = [], []
+        preferences = np.zeros(bandit.k)
+        avg_reward = 0
+
+        for t in range(self.horizon):
+            action_prob = softmax(preferences)
+            action = np.random.choice(bandit.k, p=action_prob)
+            action_history.append(action)
+
+            reward = bandit.reward(action)
+            reward_history.append(reward)
+
+            avg_reward += 1 / (t + 1) * (reward - avg_reward)
+            if policy != 'w_b':
+                avg_reward = 0
+
+            for i in range(bandit.k):
+                if i == action:
+                    preferences[i] += self.a * (reward - avg_reward) * (1 - action_prob[i])
+                else:
+                    preferences[i] -= self.a * (reward - avg_reward) * action_prob[i]
+
+        return None, reward_history
+
+
+def experiment(k, bandit_class, plans, runs, bandit_mean=0, need_best_ratio=True):
+    def plan_to_str(value, policy):
         return f'{str(value)},{str(policy)}'
 
     ratio_stats, reward_stats = defaultdict(list), defaultdict(list)
-    for value, policy in combinations:
-        for _ in tqdm(range(runs), desc=str(policy)):
-            bandit = bandit_class(k)
+    for value, policy in plans:
+        for _ in tqdm(range(runs), desc=plan_to_str(value, policy)):
+            bandit = bandit_class(k, loc=bandit_mean)
             best_ratio, reward_history = value.run(bandit, policy, need_best_ratio)
-            ratio_stats[combination_to_str(value, policy)].append(best_ratio)
-            reward_stats[combination_to_str(value, policy)].append(reward_history)
+            ratio_stats[plan_to_str(value, policy)].append(best_ratio)
+            reward_stats[plan_to_str(value, policy)].append(reward_history)
 
     plt.subplot(2, 1, 1)
-    for value, policy in combinations:
-        plt.plot(np.array(reward_stats[combination_to_str(value, policy)]).mean(axis=0), label=combination_to_str(value, policy))
+    for value, policy in plans:
+        plt.plot(np.array(reward_stats[plan_to_str(value, policy)]).mean(axis=0), label=plan_to_str(value, policy))
     plt.legend()
 
     if need_best_ratio:
         plt.subplot(2, 1, 2)
-        for value, policy in combinations:
-            plt.plot(np.array(ratio_stats[combination_to_str(value, policy)]).mean(axis=0), label=combination_to_str(value, policy))
+        for value, policy in plans:
+            plt.plot(np.array(ratio_stats[plan_to_str(value, policy)]).mean(axis=0), label=plan_to_str(value, policy))
 
     plt.legend()
     plt.show()
