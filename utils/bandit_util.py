@@ -24,8 +24,8 @@ class Bandit:
 
 class NonstationaryBandit(Bandit):
 
-    def __init__(self, k):
-        super().__init__(k)
+    def __init__(self, k, loc=0):
+        super().__init__(k, loc)
         self.means = np.zeros(k)
 
     def evolve(self):
@@ -198,10 +198,11 @@ class GradientValue(ConstantStepValue):
         return None, reward_history
 
 
-def experiment(k, bandit_class, plans, runs, bandit_mean=0, need_best_ratio=True):
-    def plan_to_str(value, policy):
-        return f'{str(value)},{str(policy)}'
+def plan_to_str(value, policy):
+    return f'{str(value)},{str(policy)}'
 
+
+def run_plans(k, bandit_class, plans, runs, bandit_mean=0, need_best_ratio=True):
     ratio_stats, reward_stats = defaultdict(list), defaultdict(list)
     for value, policy in plans:
         for _ in tqdm(range(runs), desc=plan_to_str(value, policy)):
@@ -209,6 +210,11 @@ def experiment(k, bandit_class, plans, runs, bandit_mean=0, need_best_ratio=True
             best_ratio, reward_history = value.run(bandit, policy, need_best_ratio)
             ratio_stats[plan_to_str(value, policy)].append(best_ratio)
             reward_stats[plan_to_str(value, policy)].append(reward_history)
+    return ratio_stats, reward_stats
+
+
+def experiment(k, bandit_class, plans, runs, bandit_mean=0, need_best_ratio=True):
+    ratio_stats, reward_stats = run_plans(k, bandit_class, plans, runs, bandit_mean, need_best_ratio)
 
     plt.subplot(2, 1, 1)
     for value, policy in plans:
@@ -219,6 +225,20 @@ def experiment(k, bandit_class, plans, runs, bandit_mean=0, need_best_ratio=True
         plt.subplot(2, 1, 2)
         for value, policy in plans:
             plt.plot(np.array(ratio_stats[plan_to_str(value, policy)]).mean(axis=0), label=plan_to_str(value, policy))
+
+    plt.legend()
+    plt.show()
+
+
+def banchmark(k, bandit_class, plans, runs, bandit_mean=0, need_best_ratio=False, from_step=0):
+    banchmark_dict = defaultdict(list)
+    for plan_name, plan_settings in plans.items():
+        for parameter, (value, policy) in plan_settings:
+            ratio_stats, reward_stats = run_plans(k, bandit_class, [(value, policy)], runs, bandit_mean, need_best_ratio)
+            banchmark_dict[plan_name].append([parameter, np.array(reward_stats[plan_to_str(value, policy)][from_step:]).mean()])
+
+    for plan_name in plans:
+        plt.plot(np.array(banchmark_dict[plan_name])[:, 0], np.array(banchmark_dict[plan_name])[:, 1], label=plan_name)
 
     plt.legend()
     plt.show()
