@@ -25,8 +25,8 @@ def p_2(s, a, *, nrow, ncol):
 
 
 if __name__ == "__main__":
-    V = analytical_state_value(nrow=5, ncol=4, γ=1, p=p_1, pi=random_pi, s_space=s_space + [(4, 1)], round=2)
+    V = analytical_state_value(nrow=5, ncol=4, γ=1, p=p_1, pi=random_pi, state_space=state_space + [(4, 1)], action_space=action_space, round=2)
     print_matrix(V)
 
-    V = analytical_state_value(nrow=5, ncol=4, γ=1, p=p_2, pi=random_pi, s_space=s_space + [(4, 1)], round=2)
+    V = analytical_state_value(nrow=5, ncol=4, γ=1, p=p_2, pi=random_pi, state_space=state_space + [(4, 1)], action_space=action_space, round=2)
     print_matrix(V)

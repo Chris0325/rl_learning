@@ -16,4 +16,4 @@ def p(s, a, *, nrow, ncol):
             return (row, col), 0
 
 
-print_matrix(analytical_state_value(nrow=5, ncol=5, γ=.9, p=p, pi=random_pi))
+print_matrix(analytical_state_value(nrow=5, ncol=5, γ=.9, p=p, pi=random_pi, state_space=tabular_states(5, 5), action_space=action_space))

@@ -2,7 +2,7 @@ import numpy as np
 from utils.util import *
 from utils.gridworld_util import *
 
-s_space = [index_to_coordinate(n, ncol=4) for n in range(1, 15)]
+state_space = [index_to_coordinate(n, ncol=4) for n in range(1, 15)]
 
 
 def p(s, a, *, nrow, ncol):
@@ -11,9 +11,9 @@ def p(s, a, *, nrow, ncol):
 
 
 if __name__ == "__main__":
-    # V = analytical_state_value(nrow=4, ncol=4, γ=1, p=p, pi=random_pi, s_space=s_space)
-    V = iterative_state_value(nrow=4, ncol=4, γ=1, p=p, pi=random_pi, s_space=s_space, max_iterations=1000)
+    # V = analytical_state_value(nrow=4, ncol=4, γ=1, p=p, pi=random_pi, state_space=state_space)
+    V = iterative_state_value(nrow=4, ncol=4, γ=1, p=p, pi=random_pi, state_space=state_space, action_space=action_space, max_iterations=1000)
 
     print_matrix(V)
-    policy = value_policy(V, nrow=4, ncol=4, γ=1, p=p, s_space=s_space)
-    print_policy(policy)
+    pi = value_policy(V, nrow=4, ncol=4, γ=1, p=p, state_space=state_space, action_space=action_space)
+    print_policy(pi, action_space=action_space, action_name=action_name)
