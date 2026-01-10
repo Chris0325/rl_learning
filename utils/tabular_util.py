@@ -4,20 +4,20 @@ from tqdm import tqdm
 from utils.util import *
 
 
-def default_stochastic_state(s, *, nrow, ncol, prob_threshold=1e-3):
-    # state, prob, reward
-    return [(s, 1, 0)]
+def default_stochastic_state_rewards(s, *, nrow, ncol, prob_threshold=1e-3):
+    # state, reward, prob
+    return [(s, 0, 1)]
 
 
 def default_valid_action(s, a):
     return True
 
 
-def analytical_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, stochastic_state=default_stochastic_state, round=1, prob_threshold=1e-3):
+def analytical_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, stochastic_state_rewards=default_stochastic_state_rewards, round=1, prob_threshold=1e-3):
     A = np.eye(nrow * ncol)
     b = np.zeros(nrow * ncol)
     for s in state_space:
-        for s_s, s_prob, s_r in stochastic_state(s, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
+        for s_s, s_r, s_prob in stochastic_state_rewards(s, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
             if s_prob > prob_threshold:
                 b[coordinate_to_index(s, ncol=ncol)] += s_prob * s_r
                 for a_index, prob in enumerate(pi(s_s)):
@@ -30,7 +30,7 @@ def analytical_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, 
     return np.linalg.solve(A, b).round(round).reshape((nrow, ncol))
 
 
-def iterative_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, stochastic_state=default_stochastic_state, round=1, θ=1e-5, max_iterations=1000, V=None, prob_threshold=1e-3):
+def iterative_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, stochastic_state_rewards=default_stochastic_state_rewards, round=1, θ=1e-5, max_iterations=1000, V=None, prob_threshold=1e-3):
     if V is None:
         V = np.zeros((nrow, ncol))
 
@@ -38,7 +38,7 @@ def iterative_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, s
         Δ = 0
         for s in state_space:
             v, V[*s] = V[*s], 0
-            for s_s, s_prob, s_r in stochastic_state(s, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
+            for s_s, s_r, s_prob in stochastic_state_rewards(s, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
                 if s_prob > prob_threshold:
                     V[*s] += s_prob * s_r
                     for a_index, prob in enumerate(pi(s_s)):
@@ -68,15 +68,17 @@ def value_policy(V, *, nrow, ncol, γ, p, state_space, action_space, valid_actio
     return policy
 
 
-def policy_iteration(*, policy, nrow, ncol, γ, p, state_space, action_space, valid_action, stochastic_state=default_stochastic_state, θ=1e-5, max_iterations=100, max_evaluation_iterations=100):
+def policy_iteration(*, policy, nrow, ncol, γ, p, state_space, action_space, action_name, valid_action, stochastic_state_rewards=default_stochastic_state_rewards, θ=1e-5, max_iterations=100, max_evaluation_iterations=100, prob_threshold=1e-3):
     V = np.zeros((nrow, ncol))
+    print_policy(policy, action_space=action_space, action_name=action_name)
 
     for _ in tqdm(range(max_iterations), desc='Policy Iteration'):
-        V = iterative_state_value(nrow=nrow, ncol=ncol, γ=γ, p=p, pi=lambda s: policy[s[0]][s[1]], state_space=state_space, action_space=action_space, stochastic_state=stochastic_state, θ=θ, V=V, max_iterations=max_evaluation_iterations)
+        V = iterative_state_value(nrow=nrow, ncol=ncol, γ=γ, p=p, pi=lambda s: policy[s[0]][s[1]], state_space=state_space, action_space=action_space, stochastic_state_rewards=stochastic_state_rewards, θ=θ, V=V, max_iterations=max_evaluation_iterations, prob_threshold=prob_threshold)
         new_policy = value_policy(V, nrow=nrow, ncol=ncol, γ=γ, p=p, state_space=state_space, action_space=action_space, valid_action=valid_action)
         if np.allclose(new_policy, policy):
             break
         policy = new_policy
+        print_policy(policy, action_space=action_space, action_name=action_name)
 
     return V, policy
 
@@ -91,5 +93,5 @@ def print_policy(policy, *, action_space, action_name):
         for j in range(ncol):
             string_policy[i] [j] = ''.join([str(action_name[action_space[index]]) for index, prob in enumerate(policy[i][j]) if prob > 0])
 
-    print(string_policy)
+    # print(string_policy)
     print_matrix(np.array(string_policy))
