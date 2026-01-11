@@ -49,7 +49,7 @@ def value_policy(V, *, nrow, ncol, γ, p, state_space, action_space, valid_actio
                 s_next, r = p(s, a, nrow=nrow, ncol=ncol)
                 q_values.append(r + γ * V[*s_next])
             else:
-                q_values.append(-float('inf'))
+                q_values.append(-1e5)
         q_values = np.array(q_values)
         policy[s[0]][s[1]] = np.where(q_values == q_values.max(), 1, 0) / len(q_values)
 

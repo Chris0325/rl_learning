@@ -45,7 +45,7 @@ def action_policy(Q, *, nrow, ncol, state_space, action_space, valid_action=defa
             if valid_action(s, action_space[a_index]):
                 q_values.append(Q[*s, a_index])
             else:
-                q_values.append(-float('inf'))
+                q_values.append(-1e5)
         q_values = np.array(q_values)
         policy[s[0]][s[1]] = np.where(q_values == q_values.max(), 1, 0) / len(q_values)
 
