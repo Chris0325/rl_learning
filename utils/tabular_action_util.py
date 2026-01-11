@@ -12,9 +12,10 @@ def iterative_action_value(*, nrow, ncol, γ, p, pi, state_space, action_space, 
                 a = action_space[a_index]
                 if valid_ation(s, a):
                     q, Q[*s, a_index] = Q[*s, a_index], 0
-                    s_next, Q[*s, a_index] = p(s, a, nrow=nrow, ncol=ncol)
-                    for s_s, s_r, s_prob in stochastic_state_rewards(s_next, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
-                        Q[*s, a_index] += s_prob * (s_r + γ * np.dot(Q[*s_s], pi(s_s)))
+                    for s_next, r, prob in p(s, a, nrow=nrow, ncol=ncol):
+                        Q[*s, a_index] += prob * r
+                        for s_s, s_r, s_prob in stochastic_state_rewards(s_next, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
+                            Q[*s, a_index] += prob *s_prob * (s_r + γ * np.dot(Q[*s_s], pi(s_s)))
                     Δ = max(Δ, abs(Q[*s, a_index] - q))
         if Δ < θ:
             break
