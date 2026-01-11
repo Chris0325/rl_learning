@@ -1,10 +1,4 @@
-import numpy as np
-from tqdm import tqdm
-import matplotlib.pyplot as plt
-from scipy.special import softmax
-from collections import defaultdict
-
-np.random.seed(0)
+from utils.util import *
 
 
 class Bandit:

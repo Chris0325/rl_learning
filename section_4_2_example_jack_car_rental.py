@@ -1,8 +1,4 @@
-import numpy as np
-from scipy import stats
-
-from utils.util import *
-from utils.tabular_util import *
+from utils.tabular_state_util import *
 
 n = 21
 state_space = tabular_states(nrow=n, ncol=n)
@@ -54,4 +50,4 @@ def stochastic_state_rewards(s, *, nrow, ncol, prob_threshold):
 
 policy = np.outer(np.ones(n**2), np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0])).reshape((n, n, 11))
 
-V, pi = policy_iteration(policy=policy, nrow=n, ncol=n, γ=0.9, p=p, state_space=state_space, action_space=action_space, action_name=action_name, valid_action=valid_action, stochastic_state_rewards=stochastic_state_rewards, max_iterations=10, prob_threshold=1e-4)
+V, pi = state_policy_iteration(policy=policy, nrow=n, ncol=n, γ=0.9, p=p, state_space=state_space, action_space=action_space, action_name=action_name, valid_action=valid_action, stochastic_state_rewards=stochastic_state_rewards, max_iterations=10, prob_threshold=1e-5)

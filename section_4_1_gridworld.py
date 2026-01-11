@@ -1,6 +1,5 @@
-import numpy as np
-from utils.util import *
 from utils.gridworld_util import *
+from utils.tabular_state_util import *
 
 state_space = [index_to_coordinate(n, ncol=4) for n in range(1, 15)]
 

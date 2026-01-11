@@ -1,5 +1,12 @@
+import numpy as np
 import pandas as pd
+from tqdm import tqdm
+from scipy import stats
 import matplotlib.pyplot as plt
+from scipy.special import softmax
+from collections import defaultdict
+
+np.random.seed(0)
 
 
 def print_matrix(V, type='dataframe'):
