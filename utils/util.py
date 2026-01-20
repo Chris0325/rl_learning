@@ -1,6 +1,7 @@
 import functools
 import numpy as np
 import pandas as pd
+from enum import Enum
 from tqdm import tqdm
 from scipy import stats
 import matplotlib.pyplot as plt
