@@ -80,7 +80,7 @@ class SlowSampleAverageValue:
         if need_best_ratio:
             action_history = np.array(action_history)
             best_hits = np.isin(action_history, best_actions).cumsum()
-            best_ratio = [count / (i + 1) for i, count in enumerate(best_hits)]
+            best_ratio = best_hits / np.arange(1, len(best_hits) + 1)
         return best_ratio, reward_history
 
 
