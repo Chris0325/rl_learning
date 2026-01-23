@@ -6,7 +6,7 @@ def default_stochastic_state_rewards(s, *, nrow, ncol, prob_threshold=1e-3):
     return [(s, 0, 1)]
 
 
-def default_valid_action(s, a):
+def default_valid_action(s, a, *, nrow, ncol):
     return True
 
 
@@ -57,3 +57,10 @@ def v_optimal_update(s, *, nrow, ncol, γ, p, pi, action_space, V, acc_prob, pro
 
 def q_expected_update_by_v(s, a, *, nrow, ncol, γ, p, V, acc_prob, prob_threshold):
     return sum([prob * (r + γ * V[*s_next]) for s_next, r, prob in p(s, a, nrow=nrow, ncol=ncol) if acc_prob * prob > prob_threshold])
+
+
+def greedy(s, *, epsilon, V, action_space):
+    if np.random.random() < epsilon:
+        return np.random.choice(range(len(action_space)))
+    else:
+        return np.random.choice(np.where(V[*s] == V[*s].max())[0])

@@ -29,7 +29,7 @@ request_probs = np.outer(possion(3, n), possion(4, n))
 return_probs = np.outer(possion(3, n), possion(2, n))
 
 
-def valid_action(s, a):
+def valid_action(s, a, *, nrow, ncol):
     return s[0] >= a[0] if a[0] >= 0 else s[1] >= a[1]
 
 

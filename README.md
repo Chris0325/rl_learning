@@ -5,6 +5,7 @@
 ```
 issue
 1. blackjack
+2. section 6.2 batch td0
 
 todo
 1. figure 5.3

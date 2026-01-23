@@ -11,32 +11,25 @@ def sample_episode():
     return trajectory
 
 
-def td0(n, a):
+def sample_method(n, a, error):
     Vs = np.zeros((n, 7))
     V = np.ones(7) / 2
     V[0] = V[6] = 0
 
     for i in range(0, n):
-        for s, r, s_next in windowed(sample_episode(), 3, step=2):
-            V[s] += a *(r + V[s_next] - V[s])
-        
         Vs[i] = V
-
-    return Vs
-
-
-def mc(n, a):
-    Vs = np.zeros((n, 7))
-    V = np.ones(7) / 2
-    V[0] = V[6] = 0
-
-    for i in range(0, n):
         episode = sample_episode()
-        for s in episode[:-1:2]:
-            V[s] += a * (episode[-2] - V[s])
-        Vs[i] = V
-
+        for s, r, s_next in windowed(episode, 3, step=2):
+            V[s] += a * error(V, s, r, s_next, episode)
     return Vs
+
+
+def td_error(V, s, r, s_next, episode):
+    return r + V[s_next] - V[s]
+
+
+def mc_error(V, s, r, s_next, episode):
+    return episode[-2] - V[s]
 
 
 def rms(V):
@@ -44,7 +37,7 @@ def rms(V):
 
 
 def run1():
-    Vs = td0(n=1001, a=.1)
+    Vs = sample_method(n=1001, a=.1, error=td_error)
     for i in [0, 1, 10, 100, 1000]:
         plt.plot(state_space, Vs[i][1:6], 'o-', label=i)
     plt.plot(state_space, np.arange(1, 6) / 6, 'o-', label='true')
@@ -53,21 +46,23 @@ def run1():
 
 
 def run2():
-    for type, a, func in [
-        ('mc', .01, mc),
-        ('mc', .02, mc),
-        ('mc', .03, mc),
-        ('mc', .04, mc),
-        ('td0', .05, td0),
-        ('td0', .1, td0),
-        ('td0', .15, td0),
+    for type, a, error in [
+        ('mc', .01, mc_error),
+        ('mc', .02, mc_error),
+        ('mc', .03, mc_error),
+        ('mc', .04, mc_error),
+        ('td0', .05, td_error),
+        ('td0', .1, td_error),
+        ('td0', .15, td_error),
     ]:
         Vs = np.zeros((100, 100))
         for i in range(100):
-            Vs[i] = np.apply_along_axis(rms, axis=1, arr=func(n=101, a=a)[1:,1:6])
+            Vs[i] = np.apply_along_axis(rms, axis=1, arr=sample_method(n=101, a=a, error=error)[1:,1:6])
         plt.plot(range(1, 101), np.mean(Vs, axis=0), label=f'{type}{a}')
     plt.legend()
     plt.show()
 
-run1()
-run2()
+
+if __name__ == '__main__':
+    run1()
+    run2()
