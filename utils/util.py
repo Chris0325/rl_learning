@@ -1,3 +1,4 @@
+import logging
 import functools
 import numpy as np
 import pandas as pd
@@ -10,6 +11,7 @@ from collections import defaultdict
 from more_itertools import windowed
 
 np.random.seed(0)
+logging.getLogger().setLevel(logging.WARN)
 
 
 def print_matrix(V, type='dataframe'):
