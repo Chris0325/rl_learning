@@ -7,7 +7,7 @@ V = np.zeros((1, 7))
 
 def p(s, a, nrow, ncol):
     r = 1 if s[1] + a[1] == 6 else 0
-    return [((0, s[1] + a[1]), r, 1)]
+    return [Transition((0, s[1] + a[1]), r, 1)]
 
 
 def random_pi(s):

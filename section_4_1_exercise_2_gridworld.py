@@ -9,17 +9,17 @@ def p_1(s, a, *, nrow, ncol):
 
     elif s == (4, 1):
         if a == (0, -1):
-            return [(index_to_coordinate(12, ncol=4), -1, 1)]
+            return [Transition(index_to_coordinate(12, ncol=4), -1, 1)]
         elif a == (-1, 0):
-            return [(index_to_coordinate(13, ncol=4), -1, 1)]
+            return [Transition(index_to_coordinate(13, ncol=4), -1, 1)]
         elif a == (0, 1):
-            return [(index_to_coordinate(14, ncol=4), -1, 1)]
+            return [Transition(index_to_coordinate(14, ncol=4), -1, 1)]
         elif a == (1, 0):
-            return [(s, -1, 1)]
+            return [Transition(s, -1, 1)]
 
 
 def p_2(s, a, *, nrow, ncol):
-    return [((index_to_coordinate(17, ncol=4), r, prob) if s == (4, 1) and a == (1, 0) else (s_next, r, prob)) for s_next, r, prob in p_1(s, a, nrow=nrow, ncol=ncol)]
+    return [(Transition(index_to_coordinate(17, ncol=4), t.r, t.prob) if s == (4, 1) and a == (1, 0) else t) for t in p_1(s, a, nrow=nrow, ncol=ncol)]
 
 
 if __name__ == "__main__":

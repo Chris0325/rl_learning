@@ -7,10 +7,10 @@ run(V, action_space)
 
 
 # exercise 6.5
-def row_stochastic():
-    return np.random.choice([-1, 0, 1])
+def row_stochastic(s):
+    return wind[s[1]] + np.random.choice([-1, 0, 1])
 
-
+V = np.zeros((nrow, ncol, 8))
 run(V, action_space, row_stochastic=row_stochastic)
 
 # exercise 6.4

@@ -4,20 +4,24 @@ from utils.tabular_util import *
 nrow, ncol = 7, 10
 wind = [0, 0, 0, -1, -1, -1, -2, -2, -1, 0]
 
-def default_row_stochastic():
-    return 0
+
+def p(s, a, *, nrow, ncol):
+    row, col = s[0] + action_space[a][0] + wind[s[1]], s[1] + action_space[a][1]
+    s_next = (int(np.clip(row, 0, nrow-1)), int(np.clip(col, 0, ncol-1)))
+    return [(s_next, -1, 1)]
 
 
-def sarsa(n, alpha, epsilon, *, V, action_space, nrow, ncol, T, row_stochastic):
+def sarsa(n, alpha, epsilon, *, V, action_space, nrow, ncol, p, T):
     episode_time = []
     t = 0
     for i in range(n):
         s = (3, 0)
         a = greedy(s, epsilon=epsilon, V=V, action_space=action_space)
         while s != (3, 7):
-            r = -1
-            row, col = s[0] + action_space[a][0] + wind[s[1]] + row_stochastic(), s[1] + action_space[a][1]
-            s_next = (int(np.clip(row, 0, nrow-1)), int(np.clip(col, 0, ncol-1)))
+            dist = p(s, a, nrow=nrow, ncol=ncol)
+            print(dist)
+            print([d[-1] for d in dist])
+            s_next, r, _ = np.random.choice(dist, p=[d[-1] for d in dist])
             a_next = greedy(s_next, epsilon=epsilon, V=V, action_space=action_space)
 
             V[*s][a] += alpha * (r + V[*s_next][a_next] - V[*s][a])
@@ -33,8 +37,8 @@ def sarsa(n, alpha, epsilon, *, V, action_space, nrow, ncol, T, row_stochastic):
     return episode_time
 
 
-def run(V, action_space, row_stochastic=default_row_stochastic):
-    episode_time = sarsa(200, alpha=.5, epsilon=.1, V=V, action_space=action_space, nrow=nrow, ncol=ncol, T=8000, row_stochastic=row_stochastic)
+def run(V, action_space, p=p):
+    episode_time = sarsa(200, alpha=.5, epsilon=.1, V=V, action_space=action_space, nrow=nrow, ncol=ncol, p=p, T=8000)
 
     # print(episode_time)
     plt.plot(np.array(episode_time)[:,1], np.array(episode_time)[:,0])

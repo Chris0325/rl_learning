@@ -14,7 +14,7 @@ def p(s, a, *, nrow, ncol):
     # parking fee
     park_reward = -4 * ((row > 10) + (col > 10))
 
-    return [((row, col), transfer_reward + park_reward, 1)]
+    return [Transition((row, col), transfer_reward + park_reward, 1)]
 
 
 policy = np.outer(np.ones(n**2), np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0])).reshape((n, n, 11))

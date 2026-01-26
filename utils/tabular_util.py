@@ -2,8 +2,7 @@ from utils.util import *
 
 
 def default_stochastic_state_rewards(s, *, nrow, ncol, prob_threshold=1e-3):
-    # state, reward, prob
-    return [(s, 0, 1)]
+    return [Transition(s, 0, 1)]
 
 
 def default_valid_action(s, a, *, nrow, ncol):
@@ -56,7 +55,7 @@ def v_optimal_update(s, *, nrow, ncol, γ, p, pi, action_space, V, acc_prob, pro
 
 
 def q_expected_update_by_v(s, a, *, nrow, ncol, γ, p, V, acc_prob, prob_threshold):
-    return sum([prob * (r + γ * V[*s_next]) for s_next, r, prob in p(s, a, nrow=nrow, ncol=ncol) if acc_prob * prob > prob_threshold])
+    return sum([t.prob * (t.r + γ * V[*t.s]) for t in p(s, a, nrow=nrow, ncol=ncol) if acc_prob * t.prob > prob_threshold])
 
 
 def greedy(s, *, epsilon, V, action_space):

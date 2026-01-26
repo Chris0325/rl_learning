@@ -15,7 +15,7 @@ def p(s, a, *, nrow, ncol):
     row = int(np.clip(row, 0, nrow-1))
     col = int(np.clip(col, 0, ncol-1))
 
-    return [((row, col), -2 * abs(a[0]), 1)]
+    return [Transition((row, col), -2 * abs(a[0]), 1)]
 
 
 def possion(lam, n):
@@ -42,7 +42,7 @@ def stochastic_state_rewards(s, *, nrow, ncol, prob_threshold):
             for (return_row, return_col), return_prob in np.ndenumerate(return_probs):
                 if request_prob * return_prob > prob_threshold:
                     s_next = (min(s_after_request[0] + return_row, nrow-1), min(s_after_request[1] + return_col, ncol-1))
-                    state_rewards.append((s_next, r, request_prob * return_prob))
+                    state_rewards.append(Transition(s_next, r, request_prob * return_prob))
     return state_rewards
 
 

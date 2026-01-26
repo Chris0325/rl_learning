@@ -5,15 +5,15 @@ def analytical_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, 
     A = np.eye(nrow * ncol)
     b = np.zeros(nrow * ncol)
     for s in state_space:
-        for s_s, s_r, s_prob in stochastic_state_rewards(s, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
-            if s_prob > prob_threshold:
-                b[coordinate_to_index(s, ncol=ncol)] += s_prob * s_r
-                for a_index, a_prob in enumerate(pi(s_s)):
-                    if s_prob * a_prob > prob_threshold:
-                        for s_next, r, prob in p(s_s, action_space[a_index], nrow=nrow, ncol=ncol):
-                            if s_prob * a_prob * prob > prob_threshold:
-                                A[coordinate_to_index(s, ncol=ncol), coordinate_to_index(s_next, ncol=ncol)] -= s_prob * a_prob * prob * γ
-                                b[coordinate_to_index(s, ncol=ncol)] += s_prob * a_prob * prob * r
+        for st in stochastic_state_rewards(s, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
+            if st.prob > prob_threshold:
+                b[coordinate_to_index(s, ncol=ncol)] += st.prob * st.r
+                for a_index, a_prob in enumerate(pi(st.s)):
+                    if st.prob * a_prob > prob_threshold:
+                        for t in p(st.s, action_space[a_index], nrow=nrow, ncol=ncol):
+                            if st.prob * a_prob * t.prob > prob_threshold:
+                                A[coordinate_to_index(s, ncol=ncol), coordinate_to_index(t.s, ncol=ncol)] -= st.prob * a_prob * t.prob * γ
+                                b[coordinate_to_index(s, ncol=ncol)] += st.prob * a_prob * t.prob * t.r
     # print_matrix(A, nrow=nrow*ncol, ncol=nrow*ncol, round=2)
 
     return np.linalg.solve(A, b).round(round).reshape((nrow, ncol))
@@ -27,9 +27,9 @@ def iterative_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, s
         Δ = 0
         for s in state_space:
             v, V[*s] = V[*s], 0
-            for s_s, s_r, s_prob in stochastic_state_rewards(s, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
-                if s_prob > prob_threshold:
-                    V[*s] += s_prob * (s_r + v_expected_update(s_s, nrow=nrow, ncol=ncol, γ=γ, p=p, pi=pi, action_space=action_space, V=V, acc_prob=s_prob, prob_threshold=prob_threshold))
+            for st in stochastic_state_rewards(s, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
+                if st.prob > prob_threshold:
+                    V[*s] += st.prob * (st.r + v_expected_update(st.s, nrow=nrow, ncol=ncol, γ=γ, p=p, pi=pi, action_space=action_space, V=V, acc_prob=st.prob, prob_threshold=prob_threshold))
             Δ = max(Δ, abs(V[s] - v))
         if Δ < θ:
             break

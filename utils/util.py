@@ -38,3 +38,8 @@ def index_to_coordinate(index, *, ncol):
 
 def tabular_states(nrow, ncol):
     return [(i, j) for i in range(nrow) for j in range(ncol)]
+
+
+class Transition:
+    def __init__(self, s, r, prob):
+        self.s, self.r, self.prob = s, r, prob
