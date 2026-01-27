@@ -11,20 +11,20 @@ def p(s, a, *, nrow, ncol):
     return [Transition(s_next, -1, 1)]
 
 
-def sarsa(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin, s_end):
+def sarsa(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin, s_end, QQ=None):
     episode_time, rewards = [], []
     j = 0
     for i in range(n):
         episode_reward = 0
 
         s = s_begin
-        a_index = greedy(s, epsilon=epsilon, Q=Q, action_space=action_space)
+        a_index = greedy(q=Q[*s], epsilon=epsilon, action_space=action_space)[0]
         while s != s_end:
             ts = p(s, action_space[a_index], nrow=nrow, ncol=ncol)
             t = np.random.choice(ts, p=[t.prob for t in ts])
-            a_next_index = greedy(t.s, epsilon=epsilon, Q=Q, action_space=action_space)
-            Q[*s][a_index] += alpha * (t.r + Q[*t.s][a_next_index] - Q[*s][a_index])
-            s, a_index = t.s, a_next_index
+            a_next_index = greedy(q=Q[*t.s_next], epsilon=epsilon, action_space=action_space)[0]
+            Q[*s][a_index] += alpha * (t.r + Q[*t.s_next][a_next_index] - Q[*s][a_index])
+            s, a_index = t.s_next, a_next_index
 
             episode_reward += t.r
             j += 1

@@ -58,8 +58,9 @@ def q_expected_update_by_v(s, a, *, nrow, ncol, γ, p, V, acc_prob, prob_thresho
     return sum([t.prob * (t.r + γ * V[*t.s]) for t in p(s, a, nrow=nrow, ncol=ncol) if acc_prob * t.prob > prob_threshold])
 
 
-def greedy(s, *, epsilon, Q, action_space):
-    if np.random.random() < epsilon:
-        return np.random.choice(range(len(action_space)))
-    else:
-        return np.random.choice(np.where(Q[*s] == Q[*s].max())[0])
+def greedy(*, q, epsilon, action_space):
+    a_max_index = np.random.choice(np.where(q == q.max())[0])
+    a_dist = np.ones(len(action_space)) * epsilon / len(action_space)
+    a_dist[a_max_index] += 1 - epsilon
+    a_index = np.random.choice(range(len(action_space))) if np.random.random() < epsilon else a_max_index
+    return a_index, a_dist

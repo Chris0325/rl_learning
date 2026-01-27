@@ -7,7 +7,7 @@ from tqdm import tqdm
 from scipy import stats
 import matplotlib.pyplot as plt
 from scipy.special import softmax
-from collections import defaultdict
+from collections import defaultdict, Counter
 from more_itertools import windowed
 
 np.random.seed(0)
@@ -43,5 +43,5 @@ def tabular_states(nrow, ncol):
 
 
 class Transition:
-    def __init__(self, s, r, prob):
-        self.s, self.r, self.prob = s, r, prob
+    def __init__(self, s_next, r, prob):
+        self.s_next, self.r, self.prob = s_next, r, prob

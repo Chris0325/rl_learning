@@ -8,11 +8,11 @@ def analytical_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, 
         for st in stochastic_state_rewards(s, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
             if st.prob > prob_threshold:
                 b[coordinate_to_index(s, ncol=ncol)] += st.prob * st.r
-                for a_index, a_prob in enumerate(pi(st.s)):
+                for a_index, a_prob in enumerate(pi(st.s_next)):
                     if st.prob * a_prob > prob_threshold:
-                        for t in p(st.s, action_space[a_index], nrow=nrow, ncol=ncol):
+                        for t in p(st.s_next, action_space[a_index], nrow=nrow, ncol=ncol):
                             if st.prob * a_prob * t.prob > prob_threshold:
-                                A[coordinate_to_index(s, ncol=ncol), coordinate_to_index(t.s, ncol=ncol)] -= st.prob * a_prob * t.prob * γ
+                                A[coordinate_to_index(s, ncol=ncol), coordinate_to_index(t.s_next, ncol=ncol)] -= st.prob * a_prob * t.prob * γ
                                 b[coordinate_to_index(s, ncol=ncol)] += st.prob * a_prob * t.prob * t.r
     # print_matrix(A, nrow=nrow*ncol, ncol=nrow*ncol, round=2)
 
@@ -29,7 +29,7 @@ def iterative_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, s
             v, V[*s] = V[*s], 0
             for st in stochastic_state_rewards(s, nrow=nrow, ncol=ncol, prob_threshold=prob_threshold):
                 if st.prob > prob_threshold:
-                    V[*s] += st.prob * (st.r + v_expected_update(st.s, nrow=nrow, ncol=ncol, γ=γ, p=p, pi=pi, action_space=action_space, V=V, acc_prob=st.prob, prob_threshold=prob_threshold))
+                    V[*s] += st.prob * (st.r + v_expected_update(st.s_next, nrow=nrow, ncol=ncol, γ=γ, p=p, pi=pi, action_space=action_space, V=V, acc_prob=st.prob, prob_threshold=prob_threshold))
             Δ = max(Δ, abs(V[s] - v))
         if Δ < θ:
             break
