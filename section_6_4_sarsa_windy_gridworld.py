@@ -11,7 +11,7 @@ def p(s, a, *, nrow, ncol):
     return [Transition(s_next, -1, 1)]
 
 
-def sarsa(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin, s_end, QQ=None):
+def sarsa(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin, s_ends, γ=1, QQ=None):
     episode_time, rewards = [], []
     j = 0
     for i in range(n):
@@ -19,11 +19,11 @@ def sarsa(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin, s_en
 
         s = s_begin
         a_index = greedy(q=Q[*s], epsilon=epsilon, action_space=action_space)[0]
-        while s != s_end:
+        while s not in s_ends:
             ts = p(s, action_space[a_index], nrow=nrow, ncol=ncol)
             t = np.random.choice(ts, p=[t.prob for t in ts])
             a_next_index = greedy(q=Q[*t.s_next], epsilon=epsilon, action_space=action_space)[0]
-            Q[*s][a_index] += alpha * (t.r + Q[*t.s_next][a_next_index] - Q[*s][a_index])
+            Q[*s][a_index] += alpha * (t.r + γ * Q[*t.s_next][a_next_index] - Q[*s][a_index])
             s, a_index = t.s_next, a_next_index
 
             episode_reward += t.r
@@ -37,8 +37,8 @@ def sarsa(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin, s_en
     return episode_time, rewards
 
 
-def run(Q, action_space, p=p, s_begin=(3, 0), s_end=(3, 7)):
-    episode_time = sarsa(200, alpha=.5, epsilon=.1, Q=Q, action_space=action_space, nrow=nrow, ncol=ncol, p=p, T=10000, s_begin=s_begin, s_end=s_end)[0]
+def run(Q, action_space, p=p, s_begin=(3, 0), s_ends=[(3, 7)]):
+    episode_time = sarsa(200, alpha=.5, epsilon=.1, Q=Q, action_space=action_space, nrow=nrow, ncol=ncol, p=p, T=10000, s_begin=s_begin, s_ends=s_ends)[0]
 
     plt.plot(np.array(episode_time)[:,1], np.array(episode_time)[:,0])
     plt.show()

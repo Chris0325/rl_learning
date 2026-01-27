@@ -55,7 +55,7 @@ def v_optimal_update(s, *, nrow, ncol, γ, p, pi, action_space, V, acc_prob, pro
 
 
 def q_expected_update_by_v(s, a, *, nrow, ncol, γ, p, V, acc_prob, prob_threshold):
-    return sum([t.prob * (t.r + γ * V[*t.s]) for t in p(s, a, nrow=nrow, ncol=ncol) if acc_prob * t.prob > prob_threshold])
+    return sum([t.prob * (t.r + γ * V[*t.s_next]) for t in p(s, a, nrow=nrow, ncol=ncol) if acc_prob * t.prob > prob_threshold])
 
 
 def greedy(*, q, epsilon, action_space):

@@ -14,7 +14,7 @@ def p(s, a, *, nrow, ncol):
         return [Transition((row, col), 0, 1)]
 
 
-def double_q_learning(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin, s_end, QQ=None):
+def double_q_learning(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin, s_ends, γ=1, QQ=None):
     episode_time, rewards, action_history = [], [], []
     j = 0
     for i in range(n):
@@ -22,7 +22,7 @@ def double_q_learning(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s
         episode_reward = 0
 
         s = s_begin
-        while s != s_end:
+        while s not in s_ends:
             a_index = greedy(q=Q[*s]+QQ[*s], epsilon=epsilon, action_space=action_space)[0]
             action_counter[s][a_index] += 1
 
@@ -30,9 +30,9 @@ def double_q_learning(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s
             t = np.random.choice(ts, p=[t.prob for t in ts])
 
             if np.random.random() < .5:
-                Q[*s][a_index] += alpha * (t.r + QQ[*t.s_next][np.argmax(Q[*t.s_next])] - Q[*s][a_index])
+                Q[*s][a_index] += alpha * (t.r + γ * QQ[*t.s_next][np.argmax(Q[*t.s_next])] - Q[*s][a_index])
             else:
-                QQ[*s][a_index] += alpha * (t.r + Q[*t.s_next][np.argmax(QQ[*t.s_next])] - QQ[*s][a_index])
+                QQ[*s][a_index] += alpha * (t.r + γ * Q[*t.s_next][np.argmax(QQ[*t.s_next])] - QQ[*s][a_index])
             s = t.s_next
 
             episode_reward += t.r
@@ -46,12 +46,12 @@ def double_q_learning(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s
     return episode_time, rewards, action_history
 
 
-def run(runs, episodes, s_begin=(0, 2), s_end=(0, 0)):
+def run(runs, episodes, s_begin=(0, 2), s_ends=[(0, 0)]):
     stats = np.zeros((runs, episodes))
     for method in [q_learning, double_q_learning]:
         for i in tqdm(range(runs)):
             Q, QQ = np.zeros((nrow, ncol, len(action_space))), np.zeros((nrow, ncol, len(action_space)))
-            action_history = method(n=episodes, alpha=.1, epsilon=.1, Q=Q, action_space=action_space, nrow=nrow, ncol=ncol, p=p, T=episodes*1000, s_begin=s_begin, s_end=s_end, QQ=QQ)[2]
+            action_history = method(n=episodes, alpha=.1, epsilon=.1, Q=Q, action_space=action_space, nrow=nrow, ncol=ncol, p=p, T=episodes*1000, s_begin=s_begin, s_ends=s_ends, QQ=QQ)[2]
 
             left_cnt = np.array([action_history[j][(0, 2)][0] for j in range(episodes)]).cumsum()
             right_cnt = np.array([action_history[j][(0, 2)][1] for j in range(episodes)]).cumsum()

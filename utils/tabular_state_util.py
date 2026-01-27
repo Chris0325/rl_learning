@@ -1,7 +1,7 @@
 from utils.tabular_util import *
 
 
-def analytical_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, stochastic_state_rewards=default_stochastic_state_rewards, round=1, prob_threshold=1e-3):
+def analytical_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, stochastic_state_rewards=default_stochastic_state_rewards, round=2, prob_threshold=1e-3):
     A = np.eye(nrow * ncol)
     b = np.zeros(nrow * ncol)
     for s in state_space:
@@ -10,10 +10,10 @@ def analytical_state_value(*, nrow, ncol, γ, p, pi, state_space, action_space, 
                 b[coordinate_to_index(s, ncol=ncol)] += st.prob * st.r
                 for a_index, a_prob in enumerate(pi(st.s_next)):
                     if st.prob * a_prob > prob_threshold:
-                        for t in p(st.s_next, action_space[a_index], nrow=nrow, ncol=ncol):
-                            if st.prob * a_prob * t.prob > prob_threshold:
-                                A[coordinate_to_index(s, ncol=ncol), coordinate_to_index(t.s_next, ncol=ncol)] -= st.prob * a_prob * t.prob * γ
-                                b[coordinate_to_index(s, ncol=ncol)] += st.prob * a_prob * t.prob * t.r
+                        for tr in p(st.s_next, action_space[a_index], nrow=nrow, ncol=ncol):
+                            if st.prob * a_prob * tr.prob > prob_threshold:
+                                A[coordinate_to_index(s, ncol=ncol), coordinate_to_index(tr.s_next, ncol=ncol)] -= st.prob * a_prob * tr.prob * γ
+                                b[coordinate_to_index(s, ncol=ncol)] += st.prob * a_prob * tr.prob * tr.r
     # print_matrix(A, nrow=nrow*ncol, ncol=nrow*ncol, round=2)
 
     return np.linalg.solve(A, b).round(round).reshape((nrow, ncol))

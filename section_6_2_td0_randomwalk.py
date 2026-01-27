@@ -11,7 +11,7 @@ def sample_episode():
     return trajectory
 
 
-def sample_method(n, a, error):
+def sample_method(n, a, γ, error):
     Vs = np.zeros((n, 7))
     V = np.ones(7) / 2
     V[0] = V[6] = 0
@@ -20,15 +20,15 @@ def sample_method(n, a, error):
         Vs[i] = V
         episode = sample_episode()
         for s, r, s_next in windowed(episode, 3, step=2):
-            V[s] += a * error(V, s, r, s_next, episode)
+            V[s] += a * error(V, s, r, s_next, γ, episode)
     return Vs
 
 
-def td_error(V, s, r, s_next, episode):
+def td_error(V, s, r, s_next, γ, episode):
     return r + V[s_next] - V[s]
 
 
-def mc_error(V, s, r, s_next, episode):
+def mc_error(V, s, r, s_next, γ, episode):
     return episode[-2] - V[s]
 
 
@@ -36,8 +36,8 @@ def rms(V):
     return np.sqrt(np.mean(np.square(V - np.arange(1, 6) / 6)))
 
 
-def run1():
-    Vs = sample_method(n=1001, a=.1, error=td_error)
+def run1(γ=1):
+    Vs = sample_method(n=1001, a=.1, γ=γ, error=td_error)
     for i in [0, 1, 10, 100, 1000]:
         plt.plot(state_space, Vs[i][1:6], 'o-', label=i)
     plt.plot(state_space, np.arange(1, 6) / 6, 'o-', label='true')
@@ -45,7 +45,7 @@ def run1():
     plt.show()
 
 
-def run2():
+def run2(γ=1):
     for type, a, error in [
         ('mc', .01, mc_error),
         ('mc', .02, mc_error),
@@ -57,7 +57,7 @@ def run2():
     ]:
         Vs = np.zeros((100, 100))
         for i in range(100):
-            Vs[i] = np.apply_along_axis(rms, axis=1, arr=sample_method(n=101, a=a, error=error)[1:,1:6])
+            Vs[i] = np.apply_along_axis(rms, axis=1, arr=sample_method(n=101, a=a, γ=γ, γerror=error)[1:,1:6])
         plt.plot(range(1, 101), np.mean(Vs, axis=0), label=f'{type}{a}')
     plt.legend()
     plt.show()
