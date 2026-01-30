@@ -13,27 +13,27 @@ def p(s, a, *, nrow, ncol):
 
 def sarsa(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin, s_ends, γ=1, QQ=None):
     episode_time, rewards = [], []
-    j = 0
+    t = 0
     for i in range(n):
         episode_reward = 0
 
         s = s_begin
         a_index = greedy(q=Q[*s], epsilon=epsilon, action_space=action_space)[0]
         while s not in s_ends:
-            ts = p(s, action_space[a_index], nrow=nrow, ncol=ncol)
-            t = np.random.choice(ts, p=[t.prob for t in ts])
-            a_next_index = greedy(q=Q[*t.s_next], epsilon=epsilon, action_space=action_space)[0]
-            Q[*s][a_index] += alpha * (t.r + γ * Q[*t.s_next][a_next_index] - Q[*s][a_index])
-            s, a_index = t.s_next, a_next_index
+            trs = p(s, action_space[a_index], nrow=nrow, ncol=ncol)
+            tr = np.random.choice(trs, p=[tr.prob for tr in trs])
+            a_next_index = greedy(q=Q[*tr.s_next], epsilon=epsilon, action_space=action_space)[0]
+            Q[*s][a_index] += alpha * (tr.r + γ * Q[*tr.s_next][a_next_index] - Q[*s][a_index])
+            s, a_index = tr.s_next, a_next_index
 
-            episode_reward += t.r
-            j += 1
+            episode_reward += tr.r
+            t += 1
             episode_time.append([i, j])
             if len(episode_time) ==  T:
                 return episode_time, rewards
 
         rewards.append(episode_reward)
-        logging.info(f'episode {i}, time {j}, reward {episode_reward}')
+        logging.info(f'episode {i}, time {t}, reward {episode_reward}')
     return episode_time, rewards
 
 

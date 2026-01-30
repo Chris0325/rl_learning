@@ -16,7 +16,7 @@ def p(s, a, *, nrow, ncol):
 
 def double_q_learning(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin, s_ends, γ=1, QQ=None):
     episode_time, rewards, action_history = [], [], []
-    j = 0
+    t = 0
     for i in range(n):
         action_counter = defaultdict(Counter)
         episode_reward = 0
@@ -26,18 +26,18 @@ def double_q_learning(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s
             a_index = greedy(q=Q[*s]+QQ[*s], epsilon=epsilon, action_space=action_space)[0]
             action_counter[s][a_index] += 1
 
-            ts = p(s, action_space[a_index], nrow=nrow, ncol=ncol)
-            t = np.random.choice(ts, p=[t.prob for t in ts])
+            trs = p(s, action_space[a_index], nrow=nrow, ncol=ncol)
+            tr = np.random.choice(trs, p=[tr.prob for tr in trs])
 
             if np.random.random() < .5:
-                Q[*s][a_index] += alpha * (t.r + γ * QQ[*t.s_next][np.argmax(Q[*t.s_next])] - Q[*s][a_index])
+                Q[*s][a_index] += alpha * (tr.r + γ * QQ[*tr.s_next][np.argmax(Q[*tr.s_next])] - Q[*s][a_index])
             else:
-                QQ[*s][a_index] += alpha * (t.r + γ * Q[*t.s_next][np.argmax(QQ[*t.s_next])] - QQ[*s][a_index])
-            s = t.s_next
+                QQ[*s][a_index] += alpha * (tr.r + γ * Q[*tr.s_next][np.argmax(QQ[*tr.s_next])] - QQ[*s][a_index])
+            s = tr.s_next
 
-            episode_reward += t.r
-            j += 1
-            episode_time.append([i, j])
+            episode_reward += tr.r
+            t += 1
+            episode_time.append([i, t])
             if len(episode_time) ==  T:
                 return episode_time, rewards
 

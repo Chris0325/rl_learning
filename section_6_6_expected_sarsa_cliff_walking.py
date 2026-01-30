@@ -10,13 +10,13 @@ def expected_sarsa(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_be
         s = s_begin
         a_index = greedy(q=Q[*s], epsilon=epsilon, action_space=action_space)[0]
         while s not in s_ends:
-            ts = p(s, action_space[a_index], nrow=nrow, ncol=ncol)
-            t = np.random.choice(ts, p=[t.prob for t in ts])
-            a_next_index, a_next_dist = greedy(q=Q[*t.s_next], epsilon=epsilon, action_space=action_space)
-            Q[*s][a_index] += alpha * (t.r + γ * np.dot(Q[*t.s_next], a_next_dist) - Q[*s][a_index])
-            s, a_index = t.s_next, a_next_index
+            trs = p(s, action_space[a_index], nrow=nrow, ncol=ncol)
+            tr = np.random.choice(trs, p=[tr.prob for tr in trs])
+            a_next_index, a_next_dist = greedy(q=Q[*tr.s_next], epsilon=epsilon, action_space=action_space)
+            Q[*s][a_index] += alpha * (tr.r + γ * np.dot(Q[*tr.s_next], a_next_dist) - Q[*s][a_index])
+            s, a_index = tr.s_next, a_next_index
 
-            episode_reward += t.r
+            episode_reward += tr.r
             j += 1
             episode_time.append([i, j])
             if len(episode_time) ==  T:

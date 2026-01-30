@@ -23,12 +23,12 @@ def q_learning(n, alpha, epsilon, *, Q, action_space, nrow, ncol, p, T, s_begin,
             a_index = greedy(q=Q[*s], epsilon=epsilon, action_space=action_space)[0]
             action_counter[s][a_index] += 1
 
-            ts = p(s, action_space[a_index], nrow=nrow, ncol=ncol)
-            t = np.random.choice(ts, p=[t.prob for t in ts])
-            Q[*s][a_index] += alpha * (t.r + γ * Q[*t.s_next].max() - Q[*s][a_index])
-            s = t.s_next
+            trs = p(s, action_space[a_index], nrow=nrow, ncol=ncol)
+            tr = np.random.choice(trs, p=[tr.prob for tr in trs])
+            Q[*s][a_index] += alpha * (tr.r + γ * Q[*tr.s_next].max() - Q[*s][a_index])
+            s = tr.s_next
 
-            episode_reward += t.r
+            episode_reward += tr.r
             j += 1
             episode_time.append([i, j])
             if len(episode_time) ==  T:

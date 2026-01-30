@@ -16,4 +16,5 @@ todo
 5. off-policy mc prediction
 6. off-policy mc control
 7. afterstate tic-tac-toe
+8. figure 8.8
 ```
