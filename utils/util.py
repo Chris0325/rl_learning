@@ -31,6 +31,10 @@ def print_matrix(V, type='dataframe'):
         plt.show()
 
 
+def argmax(array):
+    return np.random.choice(np.where(array == array.max())[0])
+
+
 def coordinate_to_index(s, *, ncol):
     return s[0] * ncol + s[1]
 
