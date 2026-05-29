@@ -1,4 +1,4 @@
-from utils.tabular_state_util import *
+from utils.state_value import *
 
 state_space = [(0, i) for i in range(1, 6)]
 action_space = [(0, 1), (0, -1)]

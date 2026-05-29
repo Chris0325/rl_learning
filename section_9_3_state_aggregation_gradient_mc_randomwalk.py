@@ -1,4 +1,4 @@
-from utils.tabular_state_util import *
+from utils.state_value import *
 
 n = 1000
 state_space = [(0, i) for i in range(1, n+1)]

@@ -6,6 +6,7 @@ import pandas as pd
 from enum import Enum
 from tqdm import tqdm
 from scipy import stats
+import scipy.linalg as la
 import matplotlib.pyplot as plt
 from scipy.special import softmax
 from collections import defaultdict, Counter
@@ -35,18 +36,18 @@ def argmax(array):
     return np.random.choice(np.where(array == array.max())[0])
 
 
-def coordinate_to_index(s, *, ncol):
-    return s[0] * ncol + s[1]
+def to_index(s, *, size):
+    return s[0] * size[1] + s[1]
 
 
-def index_to_coordinate(index, *, ncol):
-    return divmod(index, ncol)
+def to_coordinate(index, *, size):
+    return divmod(index, size[1])
 
 
-def tabular_states(nrow, ncol):
-    return [(i, j) for i in range(nrow) for j in range(ncol)]
+def tabular_states(size):
+    return [(i, j) for i in range(size[0]) for j in range(size[1])]
 
 
 class Transition:
-    def __init__(self, s_next, r, prob):
-        self.s_next, self.r, self.prob = s_next, r, prob
+    def __init__(self, s, r, prob):
+        self.s, self.r, self.prob = s, r, prob

@@ -4,6 +4,7 @@
 
 ```
 issues
+0. tic tac toe needs improve
 1. blackjack
 2. section 6.2 batch td0
 3. expected sarsa not obviously outperform sarsa
@@ -15,6 +16,5 @@ todo
 4. exercise 5.14
 5. off-policy mc prediction
 6. off-policy mc control
-7. afterstate tic-tac-toe
-8. figure 8.8
+7. figure 8.8
 ```

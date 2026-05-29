@@ -1,4 +1,4 @@
-from utils.tabular_state_util import *
+from utils.state_value import *
 
 n = 21
 state_space = tabular_states(nrow=n, ncol=n)

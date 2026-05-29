@@ -1,5 +1,5 @@
 from section_4_1_gridworld import *
-from utils.tabular_state_util import *
+from utils.state_value import *
 
 n = 101
 
